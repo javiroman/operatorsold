@@ -1,0 +1,6 @@
+apiVersion: javiroman.javiroman.lan/v1alpha1
+kind: VisitorApp
+metadata:
+  name: visitorapp-sample
+spec:
+  # TODO(user): Add fields here
