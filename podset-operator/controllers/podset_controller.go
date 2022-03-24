@@ -18,13 +18,13 @@ package controllers
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	podsetgroupv1alpha1 "github/javiroman/operators/podset-operator/api/v1alpha1"
@@ -33,10 +33,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+var log = logf.Log.WithName("controller_visitorsapp")
+
 // PodSetReconciler reconciles a PodSet object
 type PodSetReconciler struct {
 	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -54,7 +55,7 @@ type PodSetReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *PodSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	Logger := r.Log.WithValues("podSet", req.NamespacedName)
+	Logger := log.WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
 	Logger.Info("Reconciling podSet")
 
 	// Try to fetch the PodSet
