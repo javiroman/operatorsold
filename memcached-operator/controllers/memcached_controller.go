@@ -97,10 +97,13 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// Ensure the deployment size is the same as the spec
 	size := memcached.Spec.Size
 	if *found.Spec.Replicas != size {
+		log.Info("Deployment changed, new replicas number",
+			"replica.size new", *found.Spec.Replicas, "replica.size old", size)
 		found.Spec.Replicas = &size
 		err = r.Update(ctx, found)
 		if err != nil {
-			log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
+			log.Error(err, "Failed to update Deployment",
+				"Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 			return ctrl.Result{}, err
 		}
 		// Ask to requeue after 1 minute in order to give enough time for the
@@ -117,7 +120,8 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		client.MatchingLabels(labelsForMemcached(memcached.Name)),
 	}
 	if err = r.List(ctx, podList, listOpts...); err != nil {
-		log.Error(err, "Failed to list pods", "Memcached.Namespace", memcached.Namespace, "Memcached.Name", memcached.Name)
+		log.Error(err, "Failed to list pods",
+			"Memcached.Namespace", memcached.Namespace, "Memcached.Name", memcached.Name)
 		return ctrl.Result{}, err
 	}
 	podNames := getPodNames(podList.Items)
