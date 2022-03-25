@@ -79,6 +79,7 @@ func (r *PodSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		"operator": "podset",
 	}
 
+	// List all pods owned by this PodSet instance
 	existingPods := &corev1.PodList{}
 	err = r.List(context.TODO(), existingPods, &client.ListOptions{
 		Namespace:     req.Namespace,
@@ -89,6 +90,7 @@ func (r *PodSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
+	// Count the pods that are pending or running as available
 	existingPodNames := make([]string, 0)
 	for _, pod := range existingPods.Items {
 		if pod.GetObjectMeta().GetDeletionTimestamp() != nil {
@@ -100,6 +102,7 @@ func (r *PodSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	Logger.Info("Checking podSet", "expected replicas", podSet.Spec.Replicas, "Pod.Names", existingPodNames)
 
+	// Update the status if necessary
 	status := podsetgroupv1alpha1.PodSetStatus{
 		Replicas: int32(len(existingPodNames)),
 		PodNames: existingPodNames,
@@ -135,7 +138,6 @@ func (r *PodSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if int32(len(existingPodNames)) > podSet.Spec.Replicas {
 		// Delete a pod. Just one at a time (this reconciler will be called again afterwards)
 		Logger.Info("Deleting a pod in the podset", "expected replicas", podSet.Spec.Replicas, "Pod.Names", existingPodNames)
-		// TODO(caoyingjun): 后续优化，删除的应该是最后创建的 pod
 		pod := existingPods.Items[0]
 		err = r.Delete(context.TODO(), &pod)
 		if err != nil {
@@ -147,7 +149,8 @@ func (r *PodSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{Requeue: true}, nil
 }
 
-// createPodFromSet returns a test-powerfu pod with the same name/namespace as the set
+// createPodFromSet returns a test-busybox with the same name/namespace as the set
+// returns a busybox pod with the same name/namespace as the cr
 func createPodFromSet(cr *podsetgroupv1alpha1.PodSet) *corev1.Pod {
 	labels := map[string]string{
 		"app":      cr.Name,
@@ -162,8 +165,8 @@ func createPodFromSet(cr *podsetgroupv1alpha1.PodSet) *corev1.Pod {
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
 				{
-					Name:    "test-powerful",
-					Image:   "jacky06/powerful-tools:v1",
+					Name:    "test-busybox",
+					Image:   "busybox",
 					Command: []string{"sleep", "infinity"},
 				},
 			},
