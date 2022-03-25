@@ -3,4 +3,5 @@ kind: VisitorApp
 metadata:
   name: visitorapp-sample
 spec:
-  # TODO(user): Add fields here
+  size: 1
+  title: This is an example Go Operator

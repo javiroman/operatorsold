@@ -29,13 +29,16 @@ type VisitorAppSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of VisitorApp. Edit visitorapp_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Size  int32  `json:"size"`
+	Title string `json:"title"`
 }
 
 // VisitorAppStatus defines the observed state of VisitorApp
 type VisitorAppStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	BackendImage  string `json:"backendImage"`
+	FrontendImage string `json:"frontendImage"`
 }
 
 //+kubebuilder:object:root=true
