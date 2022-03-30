@@ -1,0 +1,48 @@
+export BOOTSTRAP=kafka-1.kafka-broker.default.svc.cluster.local:9092
+k exec -ti kafka-0 -- kafka-topics.sh --bootstrap-server kafka-1.kafka-broker.default.svc.cluster.local:9092 --list
+k exec -ti kafka-0 -- kafka-topics.sh --bootstrap-server kafka-0.kafka-broker.default.svc.cluster.local:9092 --list
+
+k exec -ti kafka-1 -- kafka-topics.sh --bootstrap-server $BOOTSTRAP --topic FIRST-TOPIC --create --partitions 3 --replication-factor 1
+
+
+Test manual:
+
+k exec -ti kafka-0 -- kafka-console-producer.sh --broker-list $BOOTSTRAP --topic FIRST-TOPIC
+k exec -ti kafka-1 -- kafka-console-consumer.sh --bootstrap-server $BOOTSTRAP --topic FIRST-TOPIC
+
+Perf Test:
+
+k exec -ti kafka-0 -- kafka-producer-perf-test.sh --throughput -1 --topic perf-topic --num-records 1000 --record-size 3000 --producer-props bootstrap.servers=$BOOTSTRAP
+
+
+More cositas:
+
+cat describe-topic.sh 
+kafka-configs.sh \
+        --bootstrap-server kafka-standalone.node.keedio.cloud:9092 \
+        --entity-type topics \
+        --describe --entity-name $1
+
+cat drain-topic.sh 
+kafka-configs.sh \
+        --bootstrap-server kafka-standalone.node.keedio.cloud:9092 \
+        --entity-type topics \
+        --alter --entity-name $1 \
+        --add-config retention.ms=1000
+
+cat restore-defaults-topic.sh 
+kafka-configs.sh \
+        --bootstrap-server kafka-standalone.node.keedio.cloud:9092 \
+        --entity-type topics \
+        --alter --entity-name $1 \
+        --delete-config retention.ms
+
+cat remove-all-topics.sh 
+TOPICS_TO_DELETE=$(kafka-topics.sh --bootstrap-server kafka-standalone.node.keedio.cloud:9092 --list | grep -i table)
+for i in $TOPICS_TO_DELETE
+do
+        echo "removing ... $i"
+        kafka-topics.sh --bootstrap-server kafka-standalone.node.keedio.cloud:9092 --delete --topic $i
+done
+
+
