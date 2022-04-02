@@ -1,4 +1,5 @@
 export BOOTSTRAP=kafka-1.kafka-broker.default.svc.cluster.local:9092
+
 k exec -ti kafka-0 -- kafka-topics.sh --bootstrap-server kafka-1.kafka-broker.default.svc.cluster.local:9092 --list
 k exec -ti kafka-0 -- kafka-topics.sh --bootstrap-server kafka-0.kafka-broker.default.svc.cluster.local:9092 --list
 
