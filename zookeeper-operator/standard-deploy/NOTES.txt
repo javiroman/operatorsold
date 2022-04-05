@@ -1,0 +1,8 @@
+for i in 0 1 2; do echo "myid zk-$i";kubectl exec zk-$i -- cat /var/lib/zookeeper/data/myid; done
+
+kubectl exec zk-0 -- cat /opt/zookeeper/conf/zoo.cfg
+
+Test:
+
+kubectl exec zk-0 -- zkCli.sh create /hello world
+kubectl exec zk-1 -- zkCli.sh get /hello
